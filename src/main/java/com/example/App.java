@@ -18,6 +18,7 @@ public class App
     Scanner scanner;
     String currLine;
     Vector<String> stopWords;
+    boolean descending;
     private boolean isFile;
     public App(File file) {
         lines = new Vector<Line>();
@@ -32,6 +33,7 @@ public class App
         }
         currLine = "";
         stopWords = new Vector<String>();
+        descending = false;
     }
 
     public App(File inFile, File stopFile) {
@@ -62,8 +64,21 @@ public class App
 
     void printLines(Vector<String> v) {
         for (Integer i = 0; i < v.size(); i++) {
-            System.out.println(i.toString() + " " + v.get(i));
+            System.out.println((i).toString() + " " + v.get(i));
         }
+    }
+
+    void askForOrder() {
+        System.out.println("do you want the results in ascending order? [Y/n]:");
+        Scanner s = new Scanner(System.in);
+        String answer = s.nextLine().trim().toLowerCase();
+        if (answer.length() == 0 || answer.charAt(0) == 'y') {
+            descending = false;
+        }
+        else {
+            descending = true;
+        }
+        s.close();
     }
 
     public void run() {
@@ -79,7 +94,9 @@ public class App
             System.out.println("write lines and end with 'stop'");
             currLine = scanner.nextLine();
             while(!currLine.trim().equalsIgnoreCase("stop")) {
-                lines.add(new Line(currLine.trim().toLowerCase()));   
+                Line newLine = new Line(currLine);
+                newLine.filter(stopWords);
+                lines.add(newLine);
                 currLine = scanner.nextLine();
             }
         }
@@ -87,6 +104,11 @@ public class App
 
         Vector<String> v = generateRotations();
         Collections.sort(v);
+
+        askForOrder();
+        if (descending) {
+            Collections.reverse(v);
+        }
 
         printLines(v);
     }
