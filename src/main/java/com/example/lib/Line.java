@@ -5,12 +5,12 @@ import java.util.Iterator;
 import java.util.Vector;
 
 public class Line {
-    public Vector<String> words;
+    Vector<String> words;
     public Line() {
         words = new Vector<String>();
     }
     public Line(String s) {
-        String[] arr = s.split("\\s+");
+        String[] arr = s.trim().toLowerCase().split("\\s+");
         words = new Vector<String>(Arrays.asList(arr));
     }
     public Vector<Line> getRotations() {

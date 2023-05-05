@@ -3,6 +3,7 @@ package com.example;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Scanner;
 import java.util.Vector;
 
@@ -15,25 +16,25 @@ import com.example.lib.Line;
 public class App 
 {
     Vector<Line> lines;
-    Scanner scanner;
-    String currLine;
     Vector<String> stopWords;
     boolean descending;
     private boolean isFile;
+    Vector<String> rotations;
+    File inputFile;
+    Scanner stdinScanner;
+    Vector<Integer> inputSkip;
+    Vector<Integer> outputSkip;
+
     public App(File file) {
         lines = new Vector<Line>();
         isFile = true;
-        try {
-            scanner = new Scanner(file);
-        }
-        catch (FileNotFoundException e) {
-            System.err.println("file not found, defaulting to stdin...");
-            isFile = false;
-            scanner = new Scanner(System.in);
-        }
-        currLine = "";
+        inputFile = file;
         stopWords = new Vector<String>();
         descending = false;
+        rotations = new Vector<String>();
+        inputSkip = new Vector<Integer>();
+        outputSkip = new Vector<Integer>();
+        stdinScanner = new Scanner(System.in);
     }
 
     public App(File inFile, File stopFile) {
@@ -51,65 +52,212 @@ public class App
 
     }
 
-    Vector<String> generateRotations() {
-        Vector<String> output = new Vector<String>();
-        for (Integer i = 0; i < lines.size(); i++) {
-            Vector<Line> v = lines.get(i).getRotations();
-            for (Integer j = 0; j < v.size(); j++) {
-                output.add(v.get(j).toString());
-            }
-        }
-        return output;
+    public boolean isFile() {
+        return isFile;
     }
 
-    void printLines(Vector<String> v) {
-        for (Integer i = 0; i < v.size(); i++) {
-            System.out.println((i).toString() + " " + v.get(i));
+    void generateRotations() {
+        Vector<String> output = new Vector<String>();
+        Iterator<Line> linesIt = lines.iterator();
+        while (linesIt.hasNext()) {
+            Vector<Line> lineRotations = linesIt.next().getRotations();
+            Iterator<Line> lineRotationIt = lineRotations.iterator();
+            while (lineRotationIt.hasNext()) {
+                output.add(lineRotationIt.next().toString());
+            }
+        }
+        rotations = output;
+    }
+
+    void printRotations() {
+        System.out.println("OUTPUT:");
+        Iterator<String> it = rotations.iterator();
+        for (Integer i = 0; it.hasNext(); i++) {
+            System.out.println(i.toString() + " " + it.next());
+        }
+    }
+
+    void printLines() {
+        System.out.println("INPUT:");
+        Iterator<Line> it = lines.iterator();
+        for (Integer i = 0; it.hasNext(); i++) {
+            System.out.println(i.toString() + " " + it.next().toString());
         }
     }
 
     void askForOrder() {
         System.out.println("do you want the results in ascending order? [Y/n]:");
-        Scanner s = new Scanner(System.in);
-        String answer = s.nextLine().trim().toLowerCase();
-        if (answer.length() == 0 || answer.charAt(0) == 'y') {
-            descending = false;
-        }
-        else {
+        String answer = stdinScanner.nextLine().trim().toLowerCase();
+        if (answer.length() > 0 && answer.charAt(0) == 'n') {
             descending = true;
         }
-        s.close();
+        else {
+            descending = false;
+        }
+    }
+
+    void fillLinesFile(Scanner scanner) {
+        String currLine = "";
+        while(scanner.hasNextLine()) {
+            currLine = scanner.nextLine().trim().toLowerCase();
+            Line newLine = new Line(currLine);
+            newLine.filter(stopWords);
+            lines.add(newLine);        
+        }
+    }
+
+    void fillLinesStdin() {
+        String currLine = "";
+        System.out.println("write lines and end with 'stop'");
+        currLine = stdinScanner.nextLine().trim().toLowerCase();
+        while(!currLine.equalsIgnoreCase("stop")) {
+            Line newLine = new Line(currLine);
+            newLine.filter(stopWords);
+            lines.add(newLine);
+            currLine = stdinScanner.nextLine().trim().toLowerCase();
+        }
+    }
+
+    void fillLines() {
+        Scanner inputScanner;
+
+        isFile = true;
+        try {
+            inputScanner = new Scanner(inputFile);
+            fillLinesFile(inputScanner);
+            inputScanner.close();
+
+        }
+        catch (FileNotFoundException e) {
+            isFile = false;
+            System.err.println("input file not found, defaulting to stdin...");
+            fillLinesStdin();
+        }
+    }
+
+    void sortRotations() {
+        Collections.sort(rotations);
+        if (descending) {
+            Collections.reverse(rotations);
+        }
+    }
+
+    void askForSkipRotations() {
+        System.out.println("Enter the lines from the output you wish to skip (separated by whitespace):");
+        String input = stdinScanner.nextLine().trim();
+
+        if (input.isBlank()) {
+            return;
+        }
+
+        Vector<Integer> output = new Vector<Integer>();
+        String[] inputNums = input.split("\\s+");
+
+        for (String num: inputNums) {
+            try {
+                Integer i = Integer.parseInt(num);
+                output.add(i);
+            }
+            catch (NumberFormatException e) {
+                System.err.println("'" + num + "'' is not a number, skipping...");
+            }
+        }
+
+        outputSkip = output;
+    }
+
+    void askForSkipInput() {
+        System.out.println("Enter the lines from the input you wish to skip (separated by whitespace):");
+        String input = stdinScanner.nextLine().trim();
+
+        if (input.isBlank()) {
+            return;
+        }
+
+        Vector<Integer> output = new Vector<Integer>();
+        String[] inputNums = input.split("\\s+");
+
+
+        for (String num: inputNums) {
+            try {
+                Integer i = Integer.parseInt(num);
+                output.add(i);
+            }
+            catch (NumberFormatException e) {
+                System.err.println("'" + num + "'' is not a number, skipping...");
+            }
+        }
+
+        inputSkip = output;
+    }
+
+
+    void filterInput() {
+        if (inputSkip.size() == 0) {
+            return;
+        }
+
+        Vector<Line> output = new Vector<Line>();
+        Iterator<Line> inputIt = lines.iterator();
+
+        for (Integer i = 0; inputIt.hasNext(); i++) {
+            Line line = inputIt.next();
+            Iterator<Integer> skipIt = inputSkip.iterator();
+            boolean skip = false;
+            while (skipIt.hasNext()) {
+                if (skipIt.next() == i) {
+                    skip = true;
+                    break;
+                }
+            }
+            if (!skip) {
+                output.add(line);
+            }
+        }
+
+        lines = output;
+    }
+
+    void filterRotations() {
+        if (outputSkip.size() == 0) {
+            return;
+        }
+
+        Vector<String> output = new Vector<String>();
+        Iterator<String> rotationsIt = rotations.iterator();
+
+        for (Integer i = 0; rotationsIt.hasNext(); i++) {
+            String rotation = rotationsIt.next();
+            Iterator<Integer> skipIt = outputSkip.iterator();
+            boolean skip = false;
+            while (skipIt.hasNext()) {
+                if (skipIt.next() == i) {
+                    skip = true;
+                    break;
+                }
+            }
+            if (!skip) {
+                output.add(rotation);
+            }
+        }
+
+        rotations = output;
     }
 
     public void run() {
-        if (isFile) {
-            while(scanner.hasNextLine()) {
-                currLine = scanner.nextLine().trim().toLowerCase();
-                Line newLine = new Line(currLine);
-                newLine.filter(stopWords);
-                lines.add(newLine);        
-            }
-        }
-        else {
-            System.out.println("write lines and end with 'stop'");
-            currLine = scanner.nextLine();
-            while(!currLine.trim().equalsIgnoreCase("stop")) {
-                Line newLine = new Line(currLine);
-                newLine.filter(stopWords);
-                lines.add(newLine);
-                currLine = scanner.nextLine();
-            }
-        }
-        scanner.close();
-
-        Vector<String> v = generateRotations();
-        Collections.sort(v);
+        fillLines();
+        printLines();
+        
+        askForSkipInput();
+        filterInput();
 
         askForOrder();
-        if (descending) {
-            Collections.reverse(v);
-        }
-
-        printLines(v);
+        generateRotations();
+        sortRotations();
+        printRotations();
+        
+        askForSkipRotations();
+        filterRotations();
+        printRotations();
     }
 }
