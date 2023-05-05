@@ -10,7 +10,7 @@ public class Line {
         words = new Vector<String>();
     }
     public Line(String s) {
-        String[] arr = s.trim().toLowerCase().split("\\s+");
+        String[] arr = s.toLowerCase().replaceAll("[\".,!?]", " ").trim().split("\\s+");
         words = new Vector<String>(Arrays.asList(arr));
     }
     public Vector<Line> getRotations() {
