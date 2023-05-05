@@ -45,9 +45,10 @@ public class App
                 stopWords.add(stop.nextLine().toLowerCase().trim());
             }
             stop.close();
+            System.out.println("loaded stop file");
         }
         catch (FileNotFoundException e) {
-            System.err.println("Stop file not found...");
+            System.err.println("stop file not found...");
         }
 
     }
