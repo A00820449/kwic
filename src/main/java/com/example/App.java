@@ -63,7 +63,7 @@ public class App
         return isFile;
     }
 
-    void generateRotations() {
+    public void generateRotations() {
         Vector<String> output = new Vector<String>();
         Iterator<Line> linesIt = lines.iterator();
         while (linesIt.hasNext()) {
@@ -76,7 +76,7 @@ public class App
         rotations = output;
     }
 
-    void printRotations() {
+    public void printRotations() {
         System.out.println("OUTPUT:");
         Iterator<String> it = rotations.iterator();
         for (Integer i = 0; it.hasNext(); i++) {
@@ -84,7 +84,7 @@ public class App
         }
     }
 
-    void printLines() {
+    public void printLines() {
         System.out.println("INPUT:");
         Iterator<Line> it = lines.iterator();
         for (Integer i = 0; it.hasNext(); i++) {
@@ -92,7 +92,7 @@ public class App
         }
     }
 
-    void askForOrder() {
+    public void askForOrder() {
         System.out.println("do you want the results in ascending order? [Y/n]:");
         String answer = stdinScanner.nextLine().trim().toLowerCase();
         if (answer.length() > 0 && answer.charAt(0) == 'n') {
@@ -103,7 +103,7 @@ public class App
         }
     }
 
-    void fillLinesFile(Scanner scanner) {
+    private void fillLinesFile(Scanner scanner) {
         String currLine = "";
         while(scanner.hasNextLine()) {
             currLine = scanner.nextLine().trim().toLowerCase();
@@ -113,7 +113,7 @@ public class App
         }
     }
 
-    void fillLinesStdin() {
+    private void fillLinesStdin() {
         String currLine = "";
         System.out.println("write lines and end with 'stop'");
         currLine = stdinScanner.nextLine().trim().toLowerCase();
@@ -125,7 +125,7 @@ public class App
         }
     }
 
-    void fillLines() {
+    public void fillLines() {
         Scanner inputScanner;
 
         isFile = true;
@@ -142,14 +142,14 @@ public class App
         }
     }
 
-    void sortRotations() {
+    public void sortRotations() {
         Collections.sort(rotations);
         if (descending) {
             Collections.reverse(rotations);
         }
     }
 
-    void askForSkipRotations() {
+    public void askForSkipRotations() {
         System.out.println("Enter the lines from the output you wish to skip (separated by whitespace):");
         String input = stdinScanner.nextLine().trim();
 
@@ -173,7 +173,7 @@ public class App
         outputSkip = output;
     }
 
-    void askForSkipInput() {
+    public void askForSkipInput() {
         System.out.println("Enter the lines from the input you wish to skip (separated by whitespace):");
         String input = stdinScanner.nextLine().trim();
 
@@ -199,7 +199,7 @@ public class App
     }
 
 
-    void filterInput() {
+    public void filterInput() {
         if (inputSkip.size() == 0) {
             return;
         }
@@ -225,7 +225,7 @@ public class App
         lines = output;
     }
 
-    void filterRotations() {
+    public void filterRotations() {
         if (outputSkip.size() == 0) {
             return;
         }
@@ -251,7 +251,7 @@ public class App
         rotations = output;
     }
 
-    void saveOutputFile() {
+    public void saveOutputFile() {
         try {
             FileWriter outputfile = new FileWriter(outputFilename);
             Iterator<String> it = rotations.iterator();
