@@ -9,6 +9,7 @@ public class Main {
     {   
         String inputfilename = "input.txt";
         String stopfilename = "stop.txt";
+        String outputfilename = "output.txt";
         if (args.length > 0) {
             inputfilename = args[0];
         }
@@ -17,9 +18,13 @@ public class Main {
             stopfilename = args[1];
         }
 
+        if (args.length > 2) {
+            outputfilename = args[2];
+        }
+
         File f = new File(inputfilename);
         File stopFile = new File(stopfilename);
-        app = new App(f, stopFile);
+        app = new App(f, stopFile, outputfilename);
         app.run();
     }
 }

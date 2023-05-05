@@ -2,6 +2,8 @@ package com.example;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Scanner;
@@ -9,10 +11,6 @@ import java.util.Vector;
 
 import com.example.lib.Line;
 
-/**
- * Hello world!
- *
- */
 public class App 
 {
     Vector<Line> lines;
@@ -24,6 +22,7 @@ public class App
     Scanner stdinScanner;
     Vector<Integer> inputSkip;
     Vector<Integer> outputSkip;
+    String outputFilename;
 
     public App(File file) {
         lines = new Vector<Line>();
@@ -35,6 +34,7 @@ public class App
         inputSkip = new Vector<Integer>();
         outputSkip = new Vector<Integer>();
         stdinScanner = new Scanner(System.in);
+        outputFilename = "output.txt";
     }
 
     public App(File inFile, File stopFile) {
@@ -51,6 +51,12 @@ public class App
         }
 
     }
+
+    public App(File inFile, File stopFile, String outputFilename) {
+        this(inFile, stopFile);
+        this.outputFilename = outputFilename;
+    }
+
 
     public boolean isFile() {
         return isFile;
@@ -244,6 +250,22 @@ public class App
         rotations = output;
     }
 
+    void saveOutputFile() {
+        try {
+            FileWriter outputfile = new FileWriter(outputFilename);
+            Iterator<String> it = rotations.iterator();
+            while (it.hasNext()) {
+                outputfile.write(it.next());
+                outputfile.write('\n');
+            }
+            outputfile.close();
+        }
+        catch (IOException e) {
+            System.err.println(e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     public void run() {
         fillLines();
         printLines();
@@ -259,5 +281,7 @@ public class App
         askForSkipRotations();
         filterRotations();
         printRotations();
+
+        saveOutputFile();
     }
 }
