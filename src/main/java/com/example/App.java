@@ -17,6 +17,7 @@ public class App
     Vector<Line> lines;
     Scanner scanner;
     String currLine;
+    Vector<String> stopWords;
     private boolean isFile;
     public App(File file) {
         lines = new Vector<Line>();
@@ -30,6 +31,22 @@ public class App
             scanner = new Scanner(System.in);
         }
         currLine = "";
+        stopWords = new Vector<String>();
+    }
+
+    public App(File inFile, File stopFile) {
+        this(inFile);
+        try {
+            Scanner stop = new Scanner(stopFile);
+            while (stop.hasNextLine()) {
+                stopWords.add(stop.nextLine().toLowerCase().trim());
+            }
+            stop.close();
+        }
+        catch (FileNotFoundException e) {
+            System.err.println("Stop file not found...");
+        }
+
     }
 
     Vector<String> generateRotations() {
@@ -45,15 +62,17 @@ public class App
 
     void printLines(Vector<String> v) {
         for (Integer i = 0; i < v.size(); i++) {
-            System.out.println(v.get(i));
+            System.out.println(i.toString() + " " + v.get(i));
         }
     }
 
     public void run() {
         if (isFile) {
             while(scanner.hasNextLine()) {
-                currLine = scanner.nextLine();
-                lines.add(new Line(currLine.trim().toLowerCase()));            
+                currLine = scanner.nextLine().trim().toLowerCase();
+                Line newLine = new Line(currLine);
+                newLine.filter(stopWords);
+                lines.add(newLine);        
             }
         }
         else {

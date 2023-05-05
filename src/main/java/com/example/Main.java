@@ -7,12 +7,19 @@ public class Main {
 
     public static void main( String[] args )
     {   
-        String filename = "input.txt";
+        String inputfilename = "input.txt";
+        String stopfilename = "stop.txt";
         if (args.length > 0) {
-            filename = args[0];
+            inputfilename = args[0];
         }
-        File f = new File(filename);
-        app = new App(f);
+
+        if (args.length > 1) {
+            stopfilename = args[1];
+        }
+
+        File f = new File(inputfilename);
+        File stopFile = new File(stopfilename);
+        app = new App(f, stopFile);
         app.run();
     }
 }

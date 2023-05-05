@@ -1,6 +1,7 @@
 package com.example.lib;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Vector;
 
 public class Line {
@@ -28,5 +29,19 @@ public class Line {
     }
     public String toString() {
         return String.join(" ", words);
+    }
+    public void filter(Vector<String> stopWords) {
+        Iterator<String> i = words.iterator();
+        while (i.hasNext()) {
+            String word = i.next();
+            Iterator<String> j = stopWords.iterator();
+            while (j.hasNext()) {
+                String stopWord = j.next();
+                if (word.equalsIgnoreCase(stopWord)) {
+                    i.remove();
+                    break;
+                }
+            }
+        }
     }
 }
